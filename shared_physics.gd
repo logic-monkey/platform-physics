@@ -6,7 +6,7 @@ class_name SharedPhysics
 @export var base_gravity := 3.0
 @onready var body = owner as CharacterBody2D
 
-@export var constants : PLA_PhysData
+@export var constants : PLT_PhysData
 
 const SANITY_MULTIPLIER := 30.0
 
@@ -46,3 +46,6 @@ func move_owner(delta: float, acceleration: Vector2 = Vector2.ZERO,\
 
 func burst_accelerate(acceleration: Vector2):
 	velocity_cache += acceleration * scale
+	
+var grounded := false
+var iframe := false

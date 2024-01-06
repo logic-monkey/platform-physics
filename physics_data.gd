@@ -1,6 +1,6 @@
 @icon("phys.svg")
 extends Resource
-class_name PLA_PhysData
+class_name PLT_PhysData
 
 ## Movement categories sorted by relative speed.
 enum {\
