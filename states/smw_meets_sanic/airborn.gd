@@ -28,7 +28,7 @@ func enter(previous_state = "", _msg: Dictionary = {}):
 		coyote_timer.stop()
 	else:
 		coyote_timer.start()
-		graphics.play("falling")
+		graphics.play("fall")
 
 func proc(_delta):
 	pass
@@ -43,9 +43,9 @@ func phys(_delta):
 		
 	if physics.velocity_cache.y > 0:
 		if jumping: jumping = false
-		graphics.play("falling")
+		graphics.play("fall")
 	else:
-		graphics.play("rising")
+		graphics.play("rise")
 	var grav = rising_grav
 	if not jumping: grav = falling_grav
 	var xAccel = gamepad.stick.x * physics.constants.airborn_acceleration
@@ -59,7 +59,7 @@ func phys(_delta):
 		jumping = false
 		transition("idle")
 	if physics.body.is_on_ceiling():
-		graphics.play("headbonk")
+		graphics.play("bonk")
 	
 func jump():
 	if active:
