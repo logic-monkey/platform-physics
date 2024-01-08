@@ -1,4 +1,5 @@
 extends State
+class_name ST_PH_SMW_idle
 
 @onready var graphics = %graphics as ActorGraphics2D
 @onready var gamepad = %VirtualGamepad as VirtualGamepad
@@ -14,16 +15,20 @@ func proc(_delta):
 		#transition("airborn", {"jump":true})
 		#return
 	if abs(gamepad.stick.x) > physics.constants.stick_walk_threshold:
-		cwrangler.play("stand")
+		#cwrangler.play("stand")
 		transition("walk")
 		return
 	if gamepad.stick.y <= -physics.constants.stick_crouch_threshold:
 		graphics.play("lookup")
-		cwrangler.play("stand")
+		#cwrangler.play("stand")
 		
 	
 func phys(_delta):
-	pass
+	var gravity_multiplier = physics.constants.idle_gravity
+	var drag_multiplier = physics.constants.idle_drag
+	
+	physics.move_owner(_delta, Vector2.ZERO, drag_multiplier,gravity_multiplier)
+	#Ground sensor stuff and airborn transition here
 
 func exit():
 	pass
