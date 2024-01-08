@@ -23,6 +23,8 @@ static func _static_init():
 var floor_movement_normal := Vector2.RIGHT
 var velocity_cache = Vector2.ZERO
 
+signal hit_ground
+
 func move_owner(delta: float, acceleration: Vector2 = Vector2.ZERO,\
 		drag_multiplier: float = 1, gravity_multiplier: float = 1, airborn = false):
 	
@@ -35,10 +37,14 @@ func move_owner(delta: float, acceleration: Vector2 = Vector2.ZERO,\
 	#if airborn: snapvec = Vector2.ZERO
 	body.velocity = velocity_cache
 	body.move_and_slide()
-	velocity_cache = body.get_real_velocity()
+	#velocity_cache = body.get_real_velocity()
+	velocity_cache = body.velocity
 	velocity_cache += acceleration / 2
 	if body.is_on_floor():
 		floor_movement_normal = body.get_floor_normal().rotated(1.5708)
+		if not grounded:
+			grounded = true
+			hit_ground.emit()
 	else: 
 		floor_movement_normal = Vector2.RIGHT
 	

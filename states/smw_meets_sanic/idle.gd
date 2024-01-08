@@ -2,9 +2,10 @@ extends State
 class_name ST_PH_SMW_idle
 
 @onready var graphics = %graphics as ActorGraphics2D
-@onready var gamepad = %VirtualGamepad as VirtualGamepad
+@onready var gamepad = %VirtualGamePad as VirtualGamepad
 @onready var physics = %SharedPhysics as SharedPhysics
-@onready var cwrangler = %PLT_ColliderWrangler as PLT_ColliderWrangler
+@onready var ground = %GroundSensor as GroundSensor
+#@onready var cwrangler = %PLT_ColliderWrangler as PLT_ColliderWrangler
 
 func enter(previous_state = "", _msg: Dictionary = {}):
 	graphics.play("idle")
@@ -28,7 +29,9 @@ func phys(_delta):
 	var drag_multiplier = physics.constants.idle_drag
 	
 	physics.move_owner(_delta, Vector2.ZERO, drag_multiplier,gravity_multiplier)
-	#Ground sensor stuff and airborn transition here
+	if not ground.is_colliding():
+		physics.grounded = false
+		transition("airborn")
 
 func exit():
 	pass

@@ -29,6 +29,7 @@ enum {\
 @export var walk_drag : float = 				  1.75
 @export var walk_acceleration : float = 		  1
 @export var walk_turn_acceleration : float = 	  2
+@export var walk_lower_bound : float = 			  5
 @export var walk_upper_bound : float = 			 10
 
 @export_group("Running")
@@ -45,6 +46,7 @@ enum {\
 @export_group("Airborn")
 @export var jump_strength : float = 			 15
 @export_subgroup("Airborn", "airborn_")
+@export var airborn_acceleration : float =		  0.5 
 @export var airborn_rising_gravity : float = 	  1
 @export var airborn_falling_gravity : float =	  5
 @export var airborn_drag : float = 				  0.4
