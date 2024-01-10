@@ -20,14 +20,19 @@ func _ready():
 	if "jump" in gamepad.buttons:
 		gamepad.buttons["jump"].just_pressed.connect(jump)
 
+@export var coyote_whitelist : Array[String]
+var record_of_previous_state = ""
 func enter(previous_state = "", _msg: Dictionary = {}):
+	record_of_previous_state = previous_state
 	if jumping:
 		physics.velocity_cache.y = 0
 		physics.burst_accelerate(Vector2(0, -physics.constants.jump_strength))
 		graphics.play("jump")
 		coyote_timer.stop()
 	else:
-		coyote_timer.start()
+		
+		if previous_state in coyote_whitelist:
+			coyote_timer.start()
 		graphics.play("fall")
 
 func proc(_delta):
@@ -61,6 +66,7 @@ func phys(_delta):
 	if physics.body.is_on_ceiling():
 		graphics.play("bonk")
 	
+@export var valid_states: Array[State]
 func jump():
 	if active:
 		if not coyote_timer.is_stopped():
@@ -70,8 +76,11 @@ func jump():
 		await physics.hit_ground
 		if not gamepad.check_button("jump"):
 			return
-	if active: return
+	if not state_machine.current in valid_states: return
 	jumping = true
 	transition("airborn")
+	
+func exit():
+	jumping = false
 
 

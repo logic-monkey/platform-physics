@@ -1,5 +1,5 @@
 extends State
-class_name ST_PH_Walk
+class_name ST_PH_SMW_Walk
 
 @onready var graphics = %graphics as ActorGraphics2D
 @onready var gamepad = %VirtualGamePad as VirtualGamepad
