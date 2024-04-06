@@ -45,6 +45,8 @@ func phys(_delta):
 	
 	if jumping and not gamepad.is_button_down("jump"):
 		jumping = false
+		if physics.velocity_cache.y < 0:
+			physics.velocity_cache.y = physics.velocity_cache.y *0.5
 		
 	if physics.velocity_cache.y > 0:
 		if jumping: jumping = false
@@ -52,7 +54,8 @@ func phys(_delta):
 	else:
 		graphics.play("rise")
 	var grav = rising_grav
-	if not jumping: grav = falling_grav
+	if not jumping: 
+		grav = falling_grav
 	var xAccel = gamepad.stick.x * physics.constants.airborn_acceleration
 	if (xAccel > 0 and graphics.scale.x < 0) or \
 			(xAccel < 0 and graphics.scale.x > 0):
@@ -68,6 +71,7 @@ func phys(_delta):
 	
 @export var valid_states: Array[State]
 func jump():
+	#print_rich("[wave]Jump![/wave]")
 	if active:
 		if not coyote_timer.is_stopped():
 			jumping = true

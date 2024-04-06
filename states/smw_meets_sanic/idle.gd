@@ -21,7 +21,10 @@ func proc(_delta):
 		return
 	if gamepad.stick.y <= -physics.constants.stick_crouch_threshold:
 		graphics.play("lookup")
-		#cwrangler.play("stand")
+	elif gamepad.stick.y >= physics.constants.stick_crouch_threshold:
+		graphics.play("crouch")
+	else:
+		graphics.play("idle")
 		
 	
 func phys(_delta):
