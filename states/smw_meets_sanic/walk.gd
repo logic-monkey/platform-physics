@@ -8,6 +8,9 @@ class_name ST_PH_SMW_Walk
 
 func enter(previous_state = "", _msg: Dictionary = {}):
 	graphics.play("walk")
+	var goal = owner.get_node("CameraGoal2D") as CameraGoal2D
+	if goal:
+		goal.lookat("walk")
 
 func proc(_delta):
 	#print ("Speed of %s VS Lower Bound of %s" % \
@@ -32,13 +35,18 @@ func phys(_delta):
 		if graphics.scale.x < 0:
 			graphics.scale.x = 1
 			graphics.play("turn")
+			var goal = owner.get_node("CameraGoal2D") as CameraGoal2D
+			if goal:
+				goal.lookat("walk")
 	elif xAccel < 0:
 		if physics.velocity_cache.x > 0:
 			xAccel *= physics.constants.walk_turn_acceleration
 		if graphics.scale.x > 0:
 			graphics.scale.x = -1
 			graphics.play("turn")
-		
+			var goal = owner.get_node("CameraGoal2D") as CameraGoal2D
+			if goal:
+				goal.lookat("walk")
 	xAccel *= walk_acceleration
 			
 	var drag = walk_drag_multiplier

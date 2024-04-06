@@ -61,6 +61,9 @@ func phys(_delta):
 			(xAccel < 0 and graphics.scale.x > 0):
 		graphics.scale.x *= -1
 		graphics.play("turn")
+		var goal = owner.get_node("CameraGoal2D") as CameraGoal2D
+		if goal:
+			goal.lookat("airborn")
 	var accel = Vector2(xAccel, 0)
 	physics.move_owner(_delta, accel ,drag, grav, true)
 	if physics.body.is_on_floor():
@@ -71,7 +74,9 @@ func phys(_delta):
 	
 @export var valid_states: Array[State]
 func jump():
-	#print_rich("[wave]Jump![/wave]")
+	var goal = owner.get_node("CameraGoal2D") as CameraGoal2D
+	if goal:
+		goal.lookat("airborn")
 	if active:
 		if not coyote_timer.is_stopped():
 			jumping = true
