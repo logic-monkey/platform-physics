@@ -39,6 +39,10 @@ enum {\
 @export var run_acceleration : float = 			  1.5
 @export var run_velocity_burst : float = 		  3
 @export var run_lower_bound : float = 			 20
+@export var run_jump_multiplier : float = 		 1.25
+@export var run_jump_mul_low_speed : float =	8.0
+@export var run_jump_mul_high_speed : float =	12.0
+@export var run_centrifuge_force : float = 2.0	
 @export_subgroup("Skidding", "skid_")
 @export var skid_acceleration : float = 		  1.5
 @export var skid_lower_bound : float = 			 15

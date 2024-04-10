@@ -9,7 +9,8 @@ var collider_sets = \
 			"stand": [],
 			"duck": []
 		}
-
+		
+@export 
 var hurtbox_sets = \
 		{
 			"stand": [],
@@ -20,8 +21,9 @@ var hurtbox_sets = \
 		
 func disable_set(cset, disabled : bool = true):
 	for c in cset:
-		if not c is CollisionShape2D: continue
-		c.set_deferred("disabled", disabled)
+		var n = get_node(c)
+		if not n or not n is CollisionShape2D: continue
+		n.set_deferred("disabled", disabled)
 		
 func enable_set(cset):
 	disable_set(cset, false)
@@ -36,7 +38,8 @@ func play(state: String):
 			disable_set(collider_sets[s])
 		enable_set(collider_sets[state])
 		
-	if not state in hurtbox_sets or shared_physics.iframe: return
+	if not state in hurtbox_sets: return
+	if shared_physics.iframe: await shared_physics.iframes_done
 	for s in hurtbox_sets:
 		if s == state: continue
 		disable_set(hurtbox_sets[s])

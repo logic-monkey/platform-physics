@@ -4,6 +4,7 @@ class_name ST_PH_SMW_Airborn
 @onready var graphics = %graphics as ActorGraphics2D
 @onready var gamepad = %VirtualGamePad as VirtualGamepad
 @onready var physics = %SharedPhysics as SharedPhysics
+@onready var colliders = %collider_wrangler as PLT_ColliderWrangler
 
 var jumping = false
 @onready var coyote_timer = Timer.new()
@@ -24,11 +25,24 @@ func _ready():
 var record_of_previous_state = ""
 func enter(previous_state = "", _msg: Dictionary = {}):
 	record_of_previous_state = previous_state
+	colliders.play("stand")
 	if jumping:
-		physics.velocity_cache.y = 0
-		physics.burst_accelerate(Vector2(0, -physics.constants.jump_strength))
+		var jump_normal = physics.body.up_direction
+		jump_normal = jump_normal.slerp(physics.floor_normal, 0.5)
+		var accel = jump_normal * physics.constants.jump_strength
+		if previous_state == "run":
+					var ramp : float = physics.move_speed_cache
+					ramp = clampf(ramp, physics.constants.run_jump_mul_low_speed,physics.constants.run_jump_mul_high_speed)
+					ramp -= physics.constants.run_jump_mul_low_speed
+					ramp /= physics.constants.run_jump_mul_high_speed - physics.constants.run_jump_mul_low_speed
+					accel *= 1 + ((physics.constants.run_jump_multiplier-1)*ramp)
+		physics.burst_accelerate(accel,true)
+
 		graphics.play("jump")
 		coyote_timer.stop()
+		#await get_tree().physics_frame
+		#await get_tree().physics_frame
+		#print("And our speed is... %s" % physics.move_speed_cache)
 	else:
 		
 		if previous_state in coyote_whitelist:
@@ -44,10 +58,11 @@ func phys(_delta):
 	var drag = physics.constants.airborn_drag
 	
 	if jumping and not gamepad.is_button_down("jump"):
+		#print("Jump released...")
 		jumping = false
 		if physics.velocity_cache.y < 0:
 			physics.velocity_cache.y = physics.velocity_cache.y *0.5
-		
+	#var j_vector = physics.velocity_cache.rotated(-physics.floor_rotation)
 	if physics.velocity_cache.y > 0:
 		if jumping: jumping = false
 		graphics.play("fall")

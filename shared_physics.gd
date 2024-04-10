@@ -22,12 +22,15 @@ static func _static_init():
 
 var floor_movement_normal := Vector2.RIGHT
 var velocity_cache = Vector2.ZERO
-
+var floor_rotation = 0
+var floor_normal :=Vector2.UP
+var move_speed_cache : float = 0
+var prior_accel_cache : Vector2 = Vector2.ZERO
 signal hit_ground
 
 func move_owner(delta: float, acceleration: Vector2 = Vector2.ZERO,\
 		drag_multiplier: float = 1, gravity_multiplier: float = 1, airborn = false):
-	
+	prior_accel_cache = acceleration
 	acceleration.y += base_gravity * current_gravity_multiplier * gravity_multiplier * delta * SANITY_MULTIPLIER
 	acceleration *= current_acceleration_multiplier * scale
 	acceleration -= velocity_cache * base_drag * drag_multiplier * current_drag_multiplier * delta * SANITY_MULTIPLIER
@@ -41,17 +44,27 @@ func move_owner(delta: float, acceleration: Vector2 = Vector2.ZERO,\
 	velocity_cache = body.velocity
 	velocity_cache += acceleration / 2
 	if body.is_on_floor():
-		floor_movement_normal = body.get_floor_normal().rotated(1.5708)
+		var norm = body.get_floor_normal()
+		floor_movement_normal = norm.rotated(1.5708)
+		floor_normal = norm
+		floor_rotation = norm.rotated(1.5708).angle()
 		if not grounded:
 			grounded = true
 			hit_ground.emit()
 	else: 
+		var blend = pow(0.5, delta * 10)
+		floor_rotation = lerp_angle(0, floor_rotation, blend)
 		floor_movement_normal = Vector2.RIGHT
+		floor_normal = Vector2.UP.slerp(floor_normal, blend)
+	move_speed_cache = velocity_cache.length()/scale
 	
 
 
-func burst_accelerate(acceleration: Vector2):
+func burst_accelerate(acceleration: Vector2, cancel_gravity: bool = false):
+	if cancel_gravity:
+		if velocity_cache.y > 0: velocity_cache.y = 0
 	velocity_cache += acceleration * scale
 	
 var grounded := false
 var iframe := false
+signal iframes_done
