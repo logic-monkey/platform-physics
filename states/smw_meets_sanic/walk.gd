@@ -6,14 +6,20 @@ class_name ST_PH_SMW_Walk
 @onready var physics = %SharedPhysics as SharedPhysics
 @onready var ground = %GroundSensor as GroundSensor
 @onready var colliders = %collider_wrangler as PLT_ColliderWrangler
+@onready var facing = %facing as PLA_Facing
 
 func enter(previous_state = "", _msg: Dictionary = {}):
+	if physics.velocity_cache.length_squared() < \
+			physics.constants.walk_lower_bound * SharedPhysics.scale * \
+			SharedPhysics.SANITY_MULTIPLIER and \
+			abs(gamepad.stick.x) < physics.constants.stick_walk_threshold:
+		transition("idle")
 	graphics.play("walk")
-	colliders.play("stand")
+	#colliders.play("stand")
 	var goal = owner.get_node("CameraGoal2D") as CameraGoal2D
-	if physics.velocity_cache.x > 0 and graphics.scale.x < 0 or\
-			physics.velocity_cache.x < 0 and graphics.scale.x > 0:
-		graphics.scale.x *= -1
+	if (gamepad.stick.x > 0 and not facing.facing_right) or\
+			(gamepad.stick.x < 0 and facing.facing_right):
+		facing.facing_right = not facing.facing_right
 		graphics.play("turn")
 	if goal:
 		goal.lookat("walk")
@@ -30,10 +36,16 @@ func proc(_delta):
 		transition("idle")
 		return
 	if not is_zero_approx(gamepad.stick.x) and gamepad.has_node("run") and gamepad.is_button_down("run") and\
-			physics.move_speed_cache > physics.constants.walk_upper_bound:
+			abs(physics.velocity_cache.x/SharedPhysics.scale) > physics.constants.walk_upper_bound:
 		transition("run")
 		
 func phys(_delta):
+	if graphics.has_method("check_run"):
+		if graphics.check_run():
+			colliders.play("run")
+		else:
+			colliders.play("stand")
+
 	var walk_acceleration = physics.constants.walk_acceleration
 	var walk_drag_multiplier = physics.constants.walk_drag
 	var walk_gravity_multiplier = physics.constants.walk_gravity
@@ -43,8 +55,8 @@ func phys(_delta):
 	if xAccel > 0:
 		if physics.velocity_cache.x < 0:
 			xAccel *= physics.constants.walk_turn_acceleration
-		if graphics.scale.x < 0:
-			graphics.scale.x = 1
+		if not facing.facing_right:
+			facing.facing_right = true
 			graphics.play("turn")
 			var goal = owner.get_node("CameraGoal2D") as CameraGoal2D
 			if goal:
@@ -52,12 +64,12 @@ func phys(_delta):
 	elif xAccel < 0:
 		if physics.velocity_cache.x > 0:
 			xAccel *= physics.constants.walk_turn_acceleration
-		if graphics.scale.x > 0:
-			graphics.scale.x = -1
+		if facing.facing_right:
+			facing.facing_right = false
 			graphics.play("turn")
 			var goal = owner.get_node("CameraGoal2D") as CameraGoal2D
 			if goal:
-				goal.lookat("walk")
+				goal.lookat("walk", false)
 	else:
 		const SLOWDOWN = 0.25
 		if physics.velocity_cache.x > 0:
@@ -74,11 +86,11 @@ func phys(_delta):
 	
 	physics.move_owner(_delta,physics.floor_movement_normal * xAccel, drag, grav)
 	graphics.rotation = lerp_angle(physics.floor_rotation, 0, 0.5)
-	if not ground.is_colliding():
+	if not ground.is_colliding() and not physics.body.is_on_floor():
 		transition("airborn")
 		physics.grounded = false
 
-func exit():
+func exit(_next_state:String=""):
 	graphics.rotation = 0
 
 

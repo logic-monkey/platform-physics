@@ -1,0 +1,37 @@
+[gd_scene load_steps=7 format=3 uid="uid://cg2eae0np75ks"]
+
+[ext_resource type="Script" path="res://addons/platform-physics/metascenes/gameplay.gd" id="1_lnqd5"]
+[ext_resource type="Script" path="res://addons/2D-Camera/CameraCage.gd" id="2_cb8v1"]
+[ext_resource type="Script" path="res://addons/2D-Camera/camera_dolly.gd" id="3_fo3ni"]
+[ext_resource type="Script" path="res://addons/2D-Camera/herocam.gd" id="4_qp3qu"]
+[ext_resource type="PackedScene" uid="uid://k3wijpwahxu4" path="res://beetle-game/game_manager.tscn" id="5_240kc"]
+
+[sub_resource type="Environment" id="Environment_3mbh4"]
+glow_enabled = true
+
+[node name="gameplay" type="Node2D"]
+script = ExtResource("1_lnqd5")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_3mbh4")
+
+[node name="CameraCage" type="Marker2D" parent="."]
+script = ExtResource("2_cb8v1")
+bumper_cage_vertical_offset = -100.0
+bumper_cage_height = 800.0
+bumper_cage_width = 1250.0
+bumper_thickness = 100.0
+zoom_maximum = 1.25
+zoom_speed_maximum = 50.0
+
+[node name="CameraDolly2D" type="Node2D" parent="."]
+script = ExtResource("3_fo3ni")
+lerp_speed = 10.0
+
+[node name="HeroCam2D" type="Camera2D" parent="CameraDolly2D"]
+position_smoothing_enabled = true
+position_smoothing_speed = 4.0
+script = ExtResource("4_qp3qu")
+zoom_lerp_speed = 1.0
+
+[node name="game_manager" parent="." instance=ExtResource("5_240kc")]

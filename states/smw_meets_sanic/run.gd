@@ -18,7 +18,7 @@ func _ready():
 
 func enter(previous_state = "", _msg: Dictionary = {}):
 	graphics.play("shmoove")
-	colliders.play("run")
+	#colliders.play("run")
 	physics.body.floor_snap_length = SharedPhysics.scale
 	var goal = owner.get_node("CameraGoal2D") as CameraGoal2D
 	if goal:
@@ -41,6 +41,12 @@ func proc(_delta):
 var running : bool = true
 var was_skidding :bool = false
 func phys(_delta):
+	if graphics.has_method("check_run"):
+		if graphics.check_run():
+			colliders.play("run")
+		else:
+			colliders.play("stand")
+	
 	var run_acceleration = physics.constants.run_acceleration
 	var run_drag_multiplier = physics.constants.run_drag
 	var run_gravity_multiplier = physics.constants.run_gravity
@@ -54,11 +60,11 @@ func phys(_delta):
 	# some running logic
 	var skidding := false
 	if xAccel > 0:
-		if physics.velocity_cache.x < 0:
+		if physics.velocity_cache.rotated(-rotation).x < 0:
 			skidding = true
 			xAccel *= physics.constants.skid_acceleration
 	elif xAccel < 0:
-		if physics.velocity_cache.x > 0:
+		if physics.velocity_cache.rotated(-rotation).x > 0:
 			skidding = true
 			xAccel *= physics.constants.skid_acceleration
 	if skidding and not was_skidding:
@@ -87,12 +93,13 @@ func phys(_delta):
 	physics.move_owner(_delta,accel, drag, grav)
 	
 	var blend = pow(0.5, _delta * 10)
-	graphics.rotation = lerp_angle(physics.floor_rotation, graphics.rotation, blend)
+	rotation = lerp_angle(physics.floor_rotation, graphics.rotation, blend)
+	graphics.rotation = rotation
 	physics.body.up_direction = physics.floor_normal.slerp(physics.body.up_direction, blend)
-	if not ground.is_colliding():
+	if not ground.is_colliding() and not physics.body.is_on_floor():
 		transition("airborn")
 		physics.grounded = false
-		
+var rotation : float = 0
 func _on_run_pressed():
 	#TODO: This logic is meant to apply to dodging, with running as a consequence thereof.
 	if active: return
@@ -104,7 +111,9 @@ func _on_run_pressed():
 	state_machine.transition("run")
 	physics.burst_accelerate(physics.floor_movement_normal * gamepad.stick.x * physics.constants.run_velocity_burst)
 
-func exit():
+@export var ignore_exit_list :Array[String] = []
+func exit(next_state:String=""):
+	if next_state in ignore_exit_list: return
 	physics.body.floor_snap_length = SharedPhysics.scale/7
 	physics.body.up_direction = Vector2.UP
 	var tween = create_tween()

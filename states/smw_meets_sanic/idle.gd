@@ -17,9 +17,16 @@ func _ready():
 	lookupTimer.timeout.connect(_lookupdown)
 
 func enter(previous_state = "", _msg: Dictionary = {}):
-	graphics.play("idle")
 	if not "crouch" in _msg:
 		cwrangler.play("stand")
+		graphics.play("idle")
+	else:
+		if _msg.crouch:
+			graphics.play("crouch")
+			cwrangler.play("duck")
+		else:
+			cwrangler.play("stand")
+			graphics.play("lookup")
 	var goal = owner.get_node("CameraGoal2D") as CameraGoal2D
 	if goal:
 		goal.lookat("idle")
@@ -39,7 +46,7 @@ func proc(_delta):
 		if lookupTimer.is_stopped(): lookupTimer.start()
 	elif gamepad.stick.y >= physics.constants.stick_crouch_threshold:
 		graphics.play("crouch")
-		cwrangler.play("duck")
+		cwrangler.play("duck", true)
 		if lookupTimer.is_stopped(): lookupTimer.start()
 	else:
 		graphics.play("idle")
@@ -56,12 +63,10 @@ func phys(_delta):
 	var drag_multiplier = physics.constants.idle_drag
 	
 	physics.move_owner(_delta, Vector2.ZERO, drag_multiplier,gravity_multiplier)
-	if not ground.is_colliding():
+	if not ground.is_colliding() and not physics.body.is_on_floor():
 		physics.grounded = false
 		transition("airborn")
 
-func exit():
-	pass
 
 var lookingupdown:bool=false
 func _lookupdown():
@@ -74,3 +79,6 @@ func _lookupdown():
 	else:
 		goal.lookat("lookdown")
 		lookingupdown = true
+
+func exit(_next_state:String=""):
+	lookupTimer.stop()

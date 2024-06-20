@@ -57,6 +57,11 @@ enum {\
 @export_subgroup("Flapping", "flap_")
 @export var flap_acceleration : float = 		  1.5
 @export var flap_decay : float = 				  0.75
+@export_subgroup("Wall", "wall_")
+@export var wall_gravity : float =				0.5
+@export var wall_drag : float = 				3.0
+@export var wall_press_force : float = 			4.0
+@export var wall_kick_force : Vector2 = Vector2(-10,-10)
 
 @export_group("Attack", "attack_")
 @export var attack_pushback_strength : float = 	 10

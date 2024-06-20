@@ -28,10 +28,15 @@ func disable_set(cset, disabled : bool = true):
 func enable_set(cset):
 	disable_set(cset, false)
 
-func play(state: String):
+func play(state: String, instant: bool = false):
 	if current_state == state: return
 	if not state in collider_sets and not state in hurtbox_sets: return
 	current_state = state
+	for s in hurtbox_sets:
+		if s == state: continue
+		disable_set(hurtbox_sets[s])
+
+	if not instant: await get_tree().physics_frame
 	if state in collider_sets:
 		for s in collider_sets:
 			if s == state: continue
@@ -40,7 +45,4 @@ func play(state: String):
 		
 	if not state in hurtbox_sets: return
 	if shared_physics.iframe: await shared_physics.iframes_done
-	for s in hurtbox_sets:
-		if s == state: continue
-		disable_set(hurtbox_sets[s])
 	enable_set(hurtbox_sets[state])
